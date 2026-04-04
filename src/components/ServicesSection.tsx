@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
 
-import svcTarotImg from '@/assets/svc-tarot.jpg';
-import svcHypnosisImg from '@/assets/svc-hypnosis.jpg';
-import svcEnergyImg from '@/assets/svc-energy.jpg';
-import svcReikiImg from '@/assets/svc-reiki.jpg';
-import svcPastlivesImg from '@/assets/svc-pastlives.jpg';
-import svcDanceImg from '@/assets/svc-dance.jpg';
+import svcTarotImg from '@/assets/svc-tarot.png';
+import svcHypnosisImg from '@/assets/svc-hypnosis.png';
+import svcEnergyImg from '@/assets/svc-energy.png';
+import svcReikiImg from '@/assets/svc-reiki.png';
+import svcPastlivesImg from '@/assets/svc-pastlives.png';
+import svcDanceImg from '@/assets/svc-dance.png';
 import tarotBackImg from '@/assets/tarot-back.jpg';
 
 const services = [
