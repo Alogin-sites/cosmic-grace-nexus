@@ -1,15 +1,15 @@
-import StarfieldBackground from '@/components/StarfieldBackground';
-import Topbar from '@/components/Topbar';
-import Navbar from '@/components/Navbar';
-import HeroSection from '@/components/HeroSection';
-import AboutSection from '@/components/AboutSection';
-import ServicesSection from '@/components/ServicesSection';
-import RituaisSection from '@/components/RituaisSection';
-import TestimonialsSection from '@/components/TestimonialsSection';
-import EbooksSection from '@/components/EbooksSection';
-import ShopSection from '@/components/ShopSection';
-import OracleSection from '@/components/OracleSection';
-import ContactFooter from '@/components/ContactFooter';
+import StarfieldBackground from "@/components/StarfieldBackground";
+import Topbar from "@/components/Topbar";
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import AboutSection from "@/components/AboutSection";
+import ServicesSection from "@/components/ServicesSection";
+import RituaisSection from "@/components/RituaisSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import EbooksSection from "@/components/EbooksSection";
+import ShopSection from "@/components/ShopSection";
+import OracleSection from "@/components/OracleSection";
+import ContactFooter from "@/components/ContactFooter";
 
 const Index = () => {
   return (
@@ -19,10 +19,10 @@ const Index = () => {
       <Navbar />
       <main className="relative z-[1]">
         <HeroSection />
-        <AboutSection />
         <ServicesSection />
+        <AboutSection />
         <RituaisSection />
-        <TestimonialsSection />
+        {/* <TestimonialsSection /> */}
         <EbooksSection />
         <ShopSection />
         <OracleSection />
