@@ -66,7 +66,7 @@ function TarotCard3D({ revealed, imageIndex }: { revealed: boolean; imageIndex: 
     }
   });
 
-  const cardW = 1.8;
+  const cardW = 2.0;
   const cardH = 3.0;
 
   return (
@@ -91,9 +91,9 @@ function DeckCards() {
   return (
     <>
       {[-2, -1].map((i) => (
-        <mesh key={i} position={[i * 0.08, i * 0.03, i * 0.015 - 0.05]} rotation={[0, 0, i * 0.04]}>
-          <planeGeometry args={[1.8, 3.0]} />
-          <meshStandardMaterial map={backTex} side={THREE.DoubleSide} opacity={0.6} transparent />
+        <mesh key={i} position={[i * 0.06, i * 0.03, i * 0.015 - 0.05]} rotation={[0, 0, i * 0.03]}>
+          <planeGeometry args={[2.0, 3.0]} />
+          <meshBasicMaterial map={backTex} side={THREE.DoubleSide} opacity={0.6} transparent />
         </mesh>
       ))}
     </>
