@@ -438,7 +438,6 @@ const EbooksSection = () => {
           transition={{ delay: 0.6 }}
         >
           <a
-            href="https://pay.hotmart.com/H43585626D?off=49lmfz3x&sck=HOTMART_PRODUCT_PAGE&checkoutMode=0&bid=1642725761390"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-display font-bold text-sm tracking-wide transition-all duration-400 hover:scale-105 group relative overflow-hidden"
