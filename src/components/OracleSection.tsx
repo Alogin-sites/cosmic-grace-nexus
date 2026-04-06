@@ -71,20 +71,15 @@ function TarotCard3D({ revealed, imageIndex }: { revealed: boolean; imageIndex: 
 
   return (
     <group ref={groupRef}>
-      {/* Back face */}
-      <mesh position={[0, 0, -0.005]}>
+      {/* Back face (visible when not flipped) */}
+      <mesh position={[0, 0, -0.01]}>
         <planeGeometry args={[cardW, cardH]} />
-        <meshStandardMaterial map={backTex} side={THREE.FrontSide} />
+        <meshBasicMaterial map={backTex} side={THREE.FrontSide} />
       </mesh>
-      {/* Front face */}
-      <mesh ref={frontMeshRef} rotation={[0, Math.PI, 0]} position={[0, 0, 0.005]}>
+      {/* Front face (visible when flipped via Y rotation) */}
+      <mesh ref={frontMeshRef} rotation={[0, Math.PI, 0]} position={[0, 0, 0.01]}>
         <planeGeometry args={[cardW, cardH]} />
-        <meshStandardMaterial map={allTextures[imageIndex]} side={THREE.FrontSide} />
-      </mesh>
-      {/* Edge */}
-      <mesh>
-        <boxGeometry args={[cardW, cardH, 0.02]} />
-        <meshStandardMaterial color="#1a1508" />
+        <meshBasicMaterial map={allTextures[imageIndex]} side={THREE.FrontSide} />
       </mesh>
     </group>
   );
