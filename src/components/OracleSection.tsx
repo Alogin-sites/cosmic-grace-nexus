@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
@@ -14,15 +14,17 @@ import tarotPriestess from '@/assets/tarot-priestess.jpg';
 import tarotWheel from '@/assets/tarot-wheel.jpg';
 import tarotMagician from '@/assets/tarot-magician.jpg';
 
+const allCardImages = [tarotSun, tarotMoon, tarotStar, tarotTower, tarotDeath, tarotPriestess, tarotWheel, tarotMagician];
+
 const tarotCards = [
-  { name: 'O Sol', numeral: 'XIX', image: tarotSun, meaning: 'Sucesso, vitalidade e clareza iluminam seu caminho. A luz divina revela verdades ocultas e traz abundância.' },
-  { name: 'A Lua', numeral: 'XVIII', image: tarotMoon, meaning: 'Confie na intuição. Mistérios serão revelados em breve. O inconsciente guarda respostas que a razão não alcança.' },
-  { name: 'A Estrela', numeral: 'XVII', image: tarotStar, meaning: 'Esperança renovada. A cura interior está em curso. As águas sagradas purificam sua alma e renovam sua fé.' },
-  { name: 'A Torre', numeral: 'XVI', image: tarotTower, meaning: 'Transformação radical. Do caos nasce a reconstrução. Estruturas falsas desmoronam para que a verdade se erga.' },
-  { name: 'A Morte', numeral: 'XIII', image: tarotDeath, meaning: 'Fim de um ciclo. Renascimento e novos começos. O que morre abre espaço para o que precisa florescer.' },
-  { name: 'A Sacerdotisa', numeral: 'II', image: tarotPriestess, meaning: 'Sabedoria interior e mistérios velados. Os segredos do universo habitam em seu silêncio sagrado.' },
-  { name: 'A Roda da Fortuna', numeral: 'X', image: tarotWheel, meaning: 'Ciclos do destino em movimento. A roda gira e traz mudanças inevitáveis. Aceite o fluxo cósmico.' },
-  { name: 'O Mago', numeral: 'I', image: tarotMagician, meaning: 'Poder de manifestação. Todos os elementos estão à sua disposição. A vontade molda a realidade.' },
+  { name: 'O Sol', numeral: 'XIX', imageIndex: 0, meaning: 'Sucesso, vitalidade e clareza iluminam seu caminho. A luz divina revela verdades ocultas e traz abundância.' },
+  { name: 'A Lua', numeral: 'XVIII', imageIndex: 1, meaning: 'Confie na intuição. Mistérios serão revelados em breve. O inconsciente guarda respostas que a razão não alcança.' },
+  { name: 'A Estrela', numeral: 'XVII', imageIndex: 2, meaning: 'Esperança renovada. A cura interior está em curso. As águas sagradas purificam sua alma e renovam sua fé.' },
+  { name: 'A Torre', numeral: 'XVI', imageIndex: 3, meaning: 'Transformação radical. Do caos nasce a reconstrução. Estruturas falsas desmoronam para que a verdade se erga.' },
+  { name: 'A Morte', numeral: 'XIII', imageIndex: 4, meaning: 'Fim de um ciclo. Renascimento e novos começos. O que morre abre espaço para o que precisa florescer.' },
+  { name: 'A Sacerdotisa', numeral: 'II', imageIndex: 5, meaning: 'Sabedoria interior e mistérios velados. Os segredos do universo habitam em seu silêncio sagrado.' },
+  { name: 'A Roda da Fortuna', numeral: 'X', imageIndex: 6, meaning: 'Ciclos do destino em movimento. A roda gira e traz mudanças inevitáveis. Aceite o fluxo cósmico.' },
+  { name: 'O Mago', numeral: 'I', imageIndex: 7, meaning: 'Poder de manifestação. Todos os elementos estão à sua disposição. A vontade molda a realidade.' },
 ];
 
 const oracleTypes = [
@@ -32,21 +34,29 @@ const oracleTypes = [
   'Búzios',
 ];
 
-/* ── 3D Card Component ── */
-function TarotCard3D({ revealed, cardData }: { revealed: boolean; cardData: typeof tarotCards[0] }) {
+/* ── 3D Card ── */
+function TarotCard3D({ revealed, imageIndex }: { revealed: boolean; imageIndex: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  const frontMeshRef = useRef<THREE.Mesh>(null);
   const backTex = useLoader(THREE.TextureLoader, tarotBack);
-  const frontTex = useLoader(THREE.TextureLoader, cardData.image);
-  const targetRotY = useRef(0);
+  const allTextures = useLoader(THREE.TextureLoader, allCardImages);
   const currentRotY = useRef(0);
+
+  // Update front texture when card changes
+  useEffect(() => {
+    if (frontMeshRef.current) {
+      const mat = frontMeshRef.current.material as THREE.MeshStandardMaterial;
+      mat.map = allTextures[imageIndex];
+      mat.needsUpdate = true;
+    }
+  }, [imageIndex, allTextures]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    targetRotY.current = revealed ? Math.PI : 0;
-    currentRotY.current = THREE.MathUtils.lerp(currentRotY.current, targetRotY.current, delta * 3);
+    const targetRotY = revealed ? Math.PI : 0;
+    currentRotY.current = THREE.MathUtils.lerp(currentRotY.current, targetRotY, delta * 3);
     groupRef.current.rotation.y = currentRotY.current;
 
-    // subtle idle float
     if (!revealed) {
       groupRef.current.rotation.z = Math.sin(Date.now() * 0.001) * 0.02;
       groupRef.current.position.y = Math.sin(Date.now() * 0.0008) * 0.05;
@@ -66,10 +76,10 @@ function TarotCard3D({ revealed, cardData }: { revealed: boolean; cardData: type
         <planeGeometry args={[cardW, cardH]} />
         <meshStandardMaterial map={backTex} side={THREE.FrontSide} />
       </mesh>
-      {/* Front face (rotated 180 on Y so it shows when flipped) */}
-      <mesh rotation={[0, Math.PI, 0]} position={[0, 0, 0.005]}>
+      {/* Front face */}
+      <mesh ref={frontMeshRef} rotation={[0, Math.PI, 0]} position={[0, 0, 0.005]}>
         <planeGeometry args={[cardW, cardH]} />
-        <meshStandardMaterial map={frontTex} side={THREE.FrontSide} />
+        <meshStandardMaterial map={allTextures[imageIndex]} side={THREE.FrontSide} />
       </mesh>
       {/* Edge */}
       <mesh>
@@ -80,18 +90,13 @@ function TarotCard3D({ revealed, cardData }: { revealed: boolean; cardData: type
   );
 }
 
-/* ── Stacked deck cards (decorative) ── */
+/* ── Stacked deck cards ── */
 function DeckCards() {
   const backTex = useLoader(THREE.TextureLoader, tarotBack);
-
   return (
     <>
       {[-2, -1].map((i) => (
-        <mesh
-          key={i}
-          position={[i * 0.08, i * 0.03, i * 0.015 - 0.05]}
-          rotation={[0, 0, i * 0.04]}
-        >
+        <mesh key={i} position={[i * 0.08, i * 0.03, i * 0.015 - 0.05]} rotation={[0, 0, i * 0.04]}>
           <planeGeometry args={[1.8, 3.0]} />
           <meshStandardMaterial map={backTex} side={THREE.DoubleSide} opacity={0.6} transparent />
         </mesh>
@@ -100,36 +105,25 @@ function DeckCards() {
   );
 }
 
-/* ── Ambient glow light ── */
+/* ── Glow light ── */
 function GlowLight({ revealed }: { revealed: boolean }) {
   const lightRef = useRef<THREE.PointLight>(null);
-
   useFrame((_, delta) => {
     if (!lightRef.current) return;
-    const target = revealed ? 2.5 : 0.8;
-    lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, target, delta * 3);
+    lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, revealed ? 2.5 : 0.8, delta * 3);
   });
-
-  return (
-    <pointLight
-      ref={lightRef}
-      position={[0, 0, 3]}
-      color="#c49a3c"
-      intensity={0.8}
-      distance={10}
-    />
-  );
+  return <pointLight ref={lightRef} position={[0, 0, 3]} color="#c49a3c" intensity={0.8} distance={10} />;
 }
 
 /* ── Scene ── */
-function OracleScene({ revealed, cardData }: { revealed: boolean; cardData: typeof tarotCards[0] }) {
+function OracleScene({ revealed, imageIndex }: { revealed: boolean; imageIndex: number }) {
   return (
     <>
       <ambientLight intensity={0.3} color="#c49a3c" />
       <GlowLight revealed={revealed} />
       <directionalLight position={[2, 3, 4]} intensity={0.4} color="#f5e6c8" />
       <DeckCards />
-      <TarotCard3D revealed={revealed} cardData={cardData} />
+      <TarotCard3D revealed={revealed} imageIndex={imageIndex} />
     </>
   );
 }
@@ -156,32 +150,16 @@ const OracleSection = () => {
   };
 
   return (
-    <section
-      id="oraculo"
-      className="relative py-32 px-6 md:px-12 overflow-hidden"
-      style={{ background: 'hsl(var(--surface-2))' }}
-    >
-      {/* Alchemy background */}
-      <div
-        className="absolute inset-0 opacity-[0.06] bg-center bg-cover pointer-events-none"
-        style={{ backgroundImage: `url(${alchemyBg})` }}
-      />
+    <section id="oraculo" className="relative py-32 px-6 md:px-12 overflow-hidden" style={{ background: 'hsl(var(--surface-2))' }}>
+      <div className="absolute inset-0 opacity-[0.06] bg-center bg-cover pointer-events-none" style={{ backgroundImage: `url(${alchemyBg})` }} />
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, hsl(0 0% 5%) 80%)' }} />
 
       <div className="relative max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Left: Text + Oracle types */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="lg:text-left text-center"
-        >
+        <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="lg:text-left text-center">
           <h2 className="section-title text-[clamp(2rem,3.5vw,3rem)]">
             Consulte o <em className="italic text-amber">Oráculo</em>
           </h2>
-          <p className="section-body mb-5">
-            Escolha seu oráculo e tire uma carta. Uma mensagem do universo espera por você.
-          </p>
+          <p className="section-body mb-5">Escolha seu oráculo e tire uma carta. Uma mensagem do universo espera por você.</p>
           <div className="flex flex-col gap-2 mb-7 max-w-sm mx-auto lg:mx-0">
             {oracleTypes.map((type, i) => (
               <button
@@ -196,16 +174,9 @@ const OracleSection = () => {
             ))}
           </div>
 
-          {/* Revealed card message */}
           <AnimatePresence>
             {revealed && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.6 }}
-                className="mt-6 max-w-sm mx-auto lg:mx-0"
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.6 }} className="mt-6 max-w-sm mx-auto lg:mx-0">
                 <div className="border border-amber/20 p-6" style={{ background: 'linear-gradient(135deg, hsl(30 30% 8% / 0.8), hsl(0 0% 4% / 0.9))' }}>
                   <span className="font-display text-[0.65rem] tracking-[0.2em] uppercase text-amber/50 block mb-1">{card.numeral}</span>
                   <span className="font-display text-lg font-semibold text-amber block mb-3">{card.name}</span>
@@ -216,28 +187,15 @@ const OracleSection = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Right: 3D Canvas */}
-        <motion.div
-          className="flex flex-col items-center gap-7"
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-        >
-          <div className="w-full aspect-[3/4] max-w-[320px] cursor-pointer" onClick={handleReveal}>
-            <Canvas
-              camera={{ position: [0, 0, 4.5], fov: 45 }}
-              gl={{ antialias: true, alpha: true }}
-              style={{ background: 'transparent' }}
-            >
+        <motion.div className="flex flex-col items-center gap-7" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+          <div className="w-full max-w-[320px] h-[420px] cursor-pointer" onClick={handleReveal}>
+            <Canvas camera={{ position: [0, 0, 4.5], fov: 45 }} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
               <Suspense fallback={null}>
-                <OracleScene revealed={revealed} cardData={card} />
+                <OracleScene revealed={revealed} imageIndex={card.imageIndex} />
               </Suspense>
             </Canvas>
           </div>
-
-          <button onClick={handleReveal} className="pill-button text-[0.68rem]">
-            {revealed ? 'Tirar Outra Carta' : 'Revelar Carta'}
-          </button>
+          <button onClick={handleReveal} className="pill-button text-[0.68rem]">{revealed ? 'Tirar Outra Carta' : 'Revelar Carta'}</button>
         </motion.div>
       </div>
     </section>
